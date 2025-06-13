@@ -6,6 +6,7 @@ import platform
 import subprocess
 import ipaddress
 import time
+import argparse
 
 def check_os():
     """
@@ -123,6 +124,35 @@ def ping_subnet_linux(subnet="192.168.1.0/24", timeout=0.1, count=1):
     
     return results
 
-if __name__ == "__main__":
+def parse_args():
+    """
+    Parse command line arguments.
+    
+    Returns:
+        argparse.Namespace: The parsed command line arguments
+    """
+    parser = argparse.ArgumentParser(description="Ping all hosts in a subnet")
+    parser.add_argument("-n", "--network", required=True, help="Subnet to ping in CIDR notation (e.g., 192.168.1.0/24)")
+    return parser.parse_args()
+
+def main():
+    """
+    Main function that orchestrates the subnet scanning process.
+    """
+    # Parse command line arguments
+    args = parse_args()
+    
+    # Detect OS
     os_type = check_os()
     print(f"Detected OS: {os_type}")
+    
+    # Call the appropriate ping function based on OS
+    if os_type == 'windows':
+        ping_subnet_windows(subnet=args.network)
+    elif os_type == 'linux':
+        ping_subnet_linux(subnet=args.network)
+    else:
+        print(f"Unsupported OS: {os_type}")
+
+if __name__ == "__main__":
+    main()
